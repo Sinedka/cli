@@ -75,7 +75,15 @@ python3.pkgs.buildPythonApplication {
     	--replace-fail 'Darkly' '${qtctStyle}'
   '';
 
-  postInstall = "installShellCompletion completions/caelestia.fish";
+  postInstall = ''
+    # Установим исполняемый файл
+    mkdir -p $out/bin
+    cp ${src}/caelestia/cli.py $out/bin/caelestia
+    chmod +x $out/bin/caelestia
+
+    # Установим completions
+    installShellCompletion completions/caelestia.fish
+  '';
 
   meta = {
     description = "The main control script for the Caelestia dotfiles";
