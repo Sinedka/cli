@@ -20,9 +20,10 @@
   discordBin ? "discord",
   qtctStyle ? "Darkly",
 }:
+
 python3.pkgs.buildPythonApplication {
   pname = "caelestia-cli";
-  version = "${rev}";
+  version = rev;
   src = ./.;
   pyproject = true;
 
@@ -39,22 +40,20 @@ python3.pkgs.buildPythonApplication {
   pythonImportsCheck = ["caelestia"];
 
   nativeBuildInputs = [installShellFiles];
-  propagatedBuildInputs =
-    [
-      swappy
-      libnotify
-      slurp
-      wl-clipboard
-      cliphist
-      app2unit
-      dart-sass
-      grim
-      fuzzel
-      wl-screenrec
-      dconf
-      killall
-    ]
-    ++ lib.optional withShell caelestia-shell;
+  propagatedBuildInputs = [
+    swappy
+    libnotify
+    slurp
+    wl-clipboard
+    cliphist
+    app2unit
+    dart-sass
+    grim
+    fuzzel
+    wl-screenrec
+    dconf
+    killall
+  ] ++ lib.optional withShell caelestia-shell;
 
   SETUPTOOLS_SCM_PRETEND_VERSION = 1;
 
@@ -75,13 +74,17 @@ python3.pkgs.buildPythonApplication {
     	--replace-fail 'Darkly' '${qtctStyle}'
   '';
 
-  postInstall = ''
-    # Установим исполняемый файл
+  # --- Новый installPhase для автоматической установки бинарника ---
+  installPhase = ''
+    # стандартная установка Python приложения
+    python3 -m pip install . --prefix=$out
+
+    # убедимся, что исполняемый файл появился в $out/bin
     mkdir -p $out/bin
-    cp ${src}/caelestia/cli.py $out/bin/caelestia
+    cp $out/lib/python*/site-packages/caelestia/cli.py $out/bin/caelestia
     chmod +x $out/bin/caelestia
 
-    # Установим completions
+    # установим completions
     installShellCompletion completions/caelestia.fish
   '';
 
